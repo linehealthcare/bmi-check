@@ -1,115 +1,120 @@
-<!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" translate="no">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>기업 검진 예약 시스템</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>성장상태 측정 계산기</title>
   <style>
     body {
       font-family: 'Noto Sans KR', sans-serif;
-      background: #f5f7fa;
       margin: 0;
-      padding: 20px;
+      padding: 0;
+      background-color: #f2f6fc;
     }
     .container {
-      max-width: 600px;
-      margin: auto;
-      background: #fff;
-      padding: 30px;
+      max-width: 700px;
+      margin: 50px auto;
+      padding: 40px;
+      background-color: #fff;
       border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
     h1 {
+      font-size: 24px;
+      color: #0059a5;
+      margin-bottom: 20px;
       text-align: center;
-      color: #0073e6;
-      margin-bottom: 30px;
     }
     label {
-      font-weight: bold;
-      margin-top: 10px;
       display: block;
+      margin-top: 20px;
+      font-weight: bold;
+      color: #333;
     }
     input, select {
       width: 100%;
       padding: 10px;
-      margin-top: 5px;
-      margin-bottom: 15px;
+      margin-top: 8px;
       border: 1px solid #ccc;
       border-radius: 8px;
-      box-sizing: border-box;
+      font-size: 16px;
     }
     button {
-      background-color: #0073e6;
+      margin-top: 30px;
+      width: 100%;
+      padding: 12px;
+      font-size: 18px;
+      font-weight: bold;
+      background-color: #0059a5;
       color: white;
       border: none;
-      padding: 12px;
       border-radius: 8px;
-      width: 100%;
-      font-size: 16px;
       cursor: pointer;
     }
-    button:hover {
-      background-color: #005bb5;
-    }
     .result {
-      margin-top: 20px;
-      background: #eaf4ff;
-      padding: 15px;
-      border-radius: 8px;
-      display: none;
+      margin-top: 30px;
+      padding: 20px;
+      background-color: #e0f2ff;
+      border-radius: 10px;
+      font-size: 16px;
+      color: #003b71;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>기업 검진 예약</h1>
-    <label for="companyCode">기업코드</label>
-    <input type="text" id="companyCode" placeholder="예: ABC123" />
-
-    <label for="hospital">검진 병원</label>
-    <select id="hospital">
-      <option value="삼모병원">삼모병원</option>
-      <option value="다나병원">다나병원</option>
-      <option value="더웰병원">더웰병원</option>
+    <h1>성장상태 측정 계산기</h1>
+    <label for="gender">성별</label>
+    <select id="gender">
+      <option value="male">남자</option>
+      <option value="female">여자</option>
     </select>
 
-    <label for="name">이름</label>
-    <input type="text" id="name" placeholder="홍길동" />
+    <label for="birthdate">생년월일</label>
+    <input type="date" id="birthdate">
 
-    <label for="phone">연락처</label>
-    <input type="text" id="phone" placeholder="010-0000-0000" />
+    <label for="checkdate">측정일</label>
+    <input type="date" id="checkdate">
 
-    <label for="date">검진 희망일</label>
-    <input type="date" id="date" />
+    <label for="height">키 (cm)</label>
+    <input type="number" id="height" placeholder="예: 120">
 
-    <button onclick="submitReservation()">예약 신청</button>
+    <label for="weight">몸무게 (kg)</label>
+    <input type="number" id="weight" placeholder="예: 25">
 
-    <div class="result" id="resultBox"></div>
+    <label for="head">머리둘레 (cm) <span style="font-weight:normal; color:#888">(6세 미만)</span></label>
+    <input type="number" id="head" placeholder="예: 45">
+
+    <button onclick="calculateGrowth()">계산하기</button>
+    <div class="result" id="growthResult">결과가 여기에 표시됩니다.</div>
   </div>
 
   <script>
-    function submitReservation() {
-      const companyCode = document.getElementById('companyCode').value;
-      const hospital = document.getElementById('hospital').value;
-      const name = document.getElementById('name').value;
-      const phone = document.getElementById('phone').value;
-      const date = document.getElementById('date').value;
+    function calculateGrowth() {
+      const gender = document.getElementById('gender').value;
+      const birthdate = new Date(document.getElementById('birthdate').value);
+      const checkdate = new Date(document.getElementById('checkdate').value);
+      const height = parseFloat(document.getElementById('height').value);
+      const weight = parseFloat(document.getElementById('weight').value);
+      const head = parseFloat(document.getElementById('head').value);
 
-      if (!companyCode || !hospital || !name || !phone || !date) {
-        alert('모든 항목을 입력해주세요.');
+      if (!birthdate || !checkdate || isNaN(height) || isNaN(weight)) {
+        document.getElementById('growthResult').innerText = '모든 필수 항목을 입력하세요.';
         return;
       }
 
-      const result = document.getElementById('resultBox');
-      result.innerHTML = `
-        <strong>예약 완료!</strong><br>
-        기업코드: ${companyCode}<br>
-        병원: ${hospital}<br>
-        이름: ${name}<br>
-        연락처: ${phone}<br>
-        희망일자: ${date}
-      `;
-      result.style.display = 'block';
+      let ageMonths = (checkdate.getFullYear() - birthdate.getFullYear()) * 12 + (checkdate.getMonth() - birthdate.getMonth());
+      if (checkdate.getDate() < birthdate.getDate()) ageMonths--;
+
+      const ageYears = ageMonths / 12;
+
+      let result = `측정 연령: 약 ${ageMonths}개월 (${ageYears.toFixed(1)}세)\n키: ${height}cm\n몸무게: ${weight}kg`;
+      if (!isNaN(head)) {
+        result += `\n머리둘레: ${head}cm`;
+      }
+
+      result += `\n\n(※ 실제 성장 백분위수 및 판정 로직은 별도 성장도표 연동 필요)`;
+
+      document.getElementById('growthResult').innerText = result;
     }
   </script>
 </body>
