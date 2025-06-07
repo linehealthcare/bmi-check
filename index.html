@@ -1,4 +1,5 @@
-<html lang="ko" translate="no">
+<!DOCTYPE html>
+<html lang="ko">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -89,6 +90,24 @@
   </div>
 
   <script>
+    const sampleChart = {
+      male: {
+        height: { 24: [83.5, 87.8, 92.5], 36: [90.1, 95.1, 100.3], 48: [96.0, 102.0, 107.0] },
+        weight: { 24: [10.2, 12.5, 14.9], 36: [11.8, 14.2, 16.7], 48: [13.3, 16.3, 19.5] }
+      },
+      female: {
+        height: { 24: [82.5, 86.4, 91.0], 36: [89.5, 94.3, 99.2], 48: [95.3, 101.0, 106.2] },
+        weight: { 24: [9.8, 12.0, 14.3], 36: [11.3, 13.9, 16.4], 48: [12.9, 15.9, 19.2] }
+      }
+    };
+
+    function classifyPercentile(value, standards) {
+      if (value < standards[0]) return "5% 미만 (저위험)";
+      if (value < standards[1]) return "5~50%";
+      if (value < standards[2]) return "50~95%";
+      return "95% 초과 (고위험)";
+    }
+
     function calculateGrowth() {
       const gender = document.getElementById('gender').value;
       const birthdate = new Date(document.getElementById('birthdate').value);
@@ -104,15 +123,17 @@
 
       let ageMonths = (checkdate.getFullYear() - birthdate.getFullYear()) * 12 + (checkdate.getMonth() - birthdate.getMonth());
       if (checkdate.getDate() < birthdate.getDate()) ageMonths--;
-
       const ageYears = ageMonths / 12;
 
-      let result = `측정 연령: 약 ${ageMonths}개월 (${ageYears.toFixed(1)}세)\n키: ${height}cm\n몸무게: ${weight}kg`;
-      if (!isNaN(head)) {
-        result += `\n머리둘레: ${head}cm`;
-      }
+      const hStd = sampleChart[gender].height[ageMonths];
+      const wStd = sampleChart[gender].weight[ageMonths];
 
-      result += `\n\n(※ 실제 성장 백분위수 및 판정 로직은 별도 성장도표 연동 필요)`;
+      let result = `측정 연령: 약 ${ageMonths}개월 (${ageYears.toFixed(1)}세)`;
+      result += `\n키: ${height}cm`;
+      result += hStd ? ` → 백분위수: ${classifyPercentile(height, hStd)}` : ' → 백분위수 데이터 없음';
+      result += `\n몸무게: ${weight}kg`;
+      result += wStd ? ` → 백분위수: ${classifyPercentile(weight, wStd)}` : ' → 백분위수 데이터 없음';
+      if (!isNaN(head)) result += `\n머리둘레: ${head}cm`;
 
       document.getElementById('growthResult').innerText = result;
     }
