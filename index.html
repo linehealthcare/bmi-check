@@ -1,7 +1,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>자녀 예상 키 계산기</title>
+  <title>자녀 예상 키 계산기 (오차범위 포함)</title>
   <style>
     body {
       font-family: 'Noto Sans KR', sans-serif;
@@ -52,17 +52,17 @@
   <h2>자녀 예상 키 계산기</h2>
 
   <label for="father">아버지 키 (cm)</label>
-  <input type="number" id="father" placeholder="예: 175">
+  <input type="number" id="father" placeholder="예: 180">
 
   <label for="mother">어머니 키 (cm)</label>
-  <input type="number" id="mother" placeholder="예: 162">
+  <input type="number" id="mother" placeholder="예: 165">
 
   <button onclick="predictHeight()">예상 키 계산</button>
 
   <div class="result" id="resultBox" style="display:none;">
     <p><strong>예상 아들 키:</strong> <span id="boyHeight"></span> cm</p>
     <p><strong>예상 딸 키:</strong> <span id="girlHeight"></span> cm</p>
-    <p style="font-size: 13px; color: gray;">※ 실제 키는 유전 외에도 환경, 영양, 수면 등에 따라 달라질 수 있습니다.</p>
+    <p style="font-size: 13px; color: gray;">※ 오차범위 ±5cm 반영됨 (유전·환경적 요인 고려)</p>
   </div>
 
   <script>
@@ -75,14 +75,16 @@
         return;
       }
 
-      const son = ((father + mother) / 2) + 6.5;
-      const daughter = ((father + mother) / 2) - 6.5;
+      const sonAvg = ((father + mother) / 2) + 6.5;
+      const daughterAvg = ((father + mother) / 2) - 6.5;
 
-      document.getElementById("boyHeight").textContent = son.toFixed(1);
-      document.getElementById("girlHeight").textContent = daughter.toFixed(1);
+      const sonRange = [ (sonAvg - 5).toFixed(1), (sonAvg + 5).toFixed(1) ];
+      const daughterRange = [ (daughterAvg - 5).toFixed(1), (daughterAvg + 5).toFixed(1) ];
+
+      document.getElementById("boyHeight").textContent = `${sonRange[0]} ~ ${sonRange[1]}`;
+      document.getElementById("girlHeight").textContent = `${daughterRange[0]} ~ ${daughterRange[1]}`;
       document.getElementById("resultBox").style.display = 'block';
     }
   </script>
 </body>
 </html>
-
