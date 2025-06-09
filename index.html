@@ -1,7 +1,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>임신 가능 기간 계산기</title>
+  <title>자녀 예상 키 계산기</title>
   <style>
     body {
       font-family: 'Noto Sans KR', sans-serif;
@@ -21,7 +21,7 @@
       margin-top: 15px;
       font-weight: bold;
     }
-    input, select {
+    input {
       width: 100%;
       padding: 10px;
       margin-top: 5px;
@@ -49,50 +49,37 @@
   </style>
 </head>
 <body>
-  <h2>임신 가능 기간 계산기</h2>
+  <h2>자녀 예상 키 계산기</h2>
 
-  <label for="startDate">최근 생리 시작일</label>
-  <input type="date" id="startDate">
+  <label for="father">아버지 키 (cm)</label>
+  <input type="number" id="father" placeholder="예: 175">
 
-  <label for="cycle">생리 주기 (일)</label>
-  <select id="cycle">
-    <option value="26">26일</option>
-    <option value="28" selected>28일</option>
-    <option value="30">30일</option>
-    <option value="32">32일</option>
-  </select>
+  <label for="mother">어머니 키 (cm)</label>
+  <input type="number" id="mother" placeholder="예: 162">
 
-  <button onclick="calculateFertile()">계산하기</button>
+  <button onclick="predictHeight()">예상 키 계산</button>
 
   <div class="result" id="resultBox" style="display:none;">
-    <p><strong>배란일:</strong> <span id="ovulation"></span></p>
-    <p><strong>가임기:</strong> <span id="fertileRange"></span></p>
+    <p><strong>예상 아들 키:</strong> <span id="boyHeight"></span> cm</p>
+    <p><strong>예상 딸 키:</strong> <span id="girlHeight"></span> cm</p>
+    <p style="font-size: 13px; color: gray;">※ 실제 키는 유전 외에도 환경, 영양, 수면 등에 따라 달라질 수 있습니다.</p>
   </div>
 
   <script>
-    function calculateFertile() {
-      const startDate = document.getElementById("startDate").value;
-      const cycle = parseInt(document.getElementById("cycle").value);
+    function predictHeight() {
+      const father = parseFloat(document.getElementById("father").value);
+      const mother = parseFloat(document.getElementById("mother").value);
 
-      if (!startDate) {
-        alert("최근 생리 시작일을 입력해주세요.");
+      if (isNaN(father) || isNaN(mother)) {
+        alert("부모님의 키를 모두 입력해주세요.");
         return;
       }
 
-      const start = new Date(startDate);
-      const ovulationDate = new Date(start);
-      ovulationDate.setDate(ovulationDate.getDate() + cycle - 14); // 배란일은 생리 시작 후 cycle-14일
+      const son = ((father + mother) / 2) + 6.5;
+      const daughter = ((father + mother) / 2) - 6.5;
 
-      const fertileStart = new Date(ovulationDate);
-      fertileStart.setDate(fertileStart.getDate() - 5);
-
-      const fertileEnd = new Date(ovulationDate);
-      fertileEnd.setDate(fertileEnd.getDate() + 1);
-
-      const formatDate = (d) => `${d.getFullYear()}-${('0'+(d.getMonth()+1)).slice(-2)}-${('0'+d.getDate()).slice(-2)}`;
-
-      document.getElementById("ovulation").textContent = formatDate(ovulationDate);
-      document.getElementById("fertileRange").textContent = `${formatDate(fertileStart)} ~ ${formatDate(fertileEnd)}`;
+      document.getElementById("boyHeight").textContent = son.toFixed(1);
+      document.getElementById("girlHeight").textContent = daughter.toFixed(1);
       document.getElementById("resultBox").style.display = 'block';
     }
   </script>
