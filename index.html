@@ -1,145 +1,101 @@
-<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>성장상태 측정 계산기</title>
+  <title>임신 가능 기간 계산기</title>
   <style>
     body {
       font-family: 'Noto Sans KR', sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #f2f6fc;
-    }
-    .container {
-      max-width: 700px;
-      margin: 50px auto;
-      padding: 40px;
-      background-color: #fff;
+      max-width: 500px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #f5f8fc;
       border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
-    h1 {
-      font-size: 24px;
-      color: #0059a5;
-      margin-bottom: 20px;
+    h2 {
       text-align: center;
+      color: #0059a5;
     }
     label {
       display: block;
-      margin-top: 20px;
+      margin-top: 15px;
       font-weight: bold;
-      color: #333;
     }
     input, select {
       width: 100%;
       padding: 10px;
-      margin-top: 8px;
-      border: 1px solid #ccc;
+      margin-top: 5px;
       border-radius: 8px;
-      font-size: 16px;
+      border: 1px solid #ccc;
     }
     button {
-      margin-top: 30px;
-      width: 100%;
+      margin-top: 20px;
       padding: 12px;
-      font-size: 18px;
-      font-weight: bold;
+      width: 100%;
       background-color: #0059a5;
       color: white;
+      font-size: 16px;
       border: none;
       border-radius: 8px;
       cursor: pointer;
     }
     .result {
-      margin-top: 30px;
-      padding: 20px;
-      background-color: #e0f2ff;
-      border-radius: 10px;
-      font-size: 16px;
-      color: #003b71;
-      white-space: pre-line;
+      margin-top: 20px;
+      padding: 15px;
+      background: white;
+      border-radius: 8px;
+      border: 1px solid #ddd;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>성장상태 측정 계산기</h1>
-    <label for="gender">성별</label>
-    <select id="gender">
-      <option value="male">남자</option>
-      <option value="female">여자</option>
-    </select>
+  <h2>임신 가능 기간 계산기</h2>
 
-    <label for="birthdate">생년월일</label>
-    <input type="date" id="birthdate">
+  <label for="startDate">최근 생리 시작일</label>
+  <input type="date" id="startDate">
 
-    <label for="checkdate">측정일</label>
-    <input type="date" id="checkdate">
+  <label for="cycle">생리 주기 (일)</label>
+  <select id="cycle">
+    <option value="26">26일</option>
+    <option value="28" selected>28일</option>
+    <option value="30">30일</option>
+    <option value="32">32일</option>
+  </select>
 
-    <label for="height">키 (cm)</label>
-    <input type="number" id="height" placeholder="예: 120">
+  <button onclick="calculateFertile()">계산하기</button>
 
-    <label for="weight">몸무게 (kg)</label>
-    <input type="number" id="weight" placeholder="예: 25">
-
-    <label for="head">머리둘레 (cm) <span style="font-weight:normal; color:#888">(6세 미만)</span></label>
-    <input type="number" id="head" placeholder="예: 45">
-
-    <button onclick="calculateGrowth()">계산하기</button>
-    <div class="result" id="growthResult">결과가 여기에 표시됩니다.</div>
+  <div class="result" id="resultBox" style="display:none;">
+    <p><strong>배란일:</strong> <span id="ovulation"></span></p>
+    <p><strong>가임기:</strong> <span id="fertileRange"></span></p>
   </div>
 
   <script>
-    const growthChart = {
-      male: {
-        height: {0: {"5th": 46.8, "50th": 47.9, "95th": 49.9}, 1: {"5th": 51.5, "50th": 52.7, "95th": 54.7}, 2: {"5th": 55.1, "50th": 56.4, "95th": 58.4}},
-        weight: {0: {"5th": 2.6, "50th": 2.9, "95th": 3.3}, 1: {"5th": 3.6, "50th": 3.9, "95th": 4.5}, 2: {"5th": 4.5, "50th": 4.9, "95th": 5.6}},
-        head:   {0: {"5th": 32.4, "50th": 33.1, "95th": 34.5}, 1: {"5th": 35.4, "50th": 36.1, "95th": 37.3}, 2: {"5th": 37.2, "50th": 37.9, "95th": 39.1}}
-      },
-      female: {
-        height: {0: {"5th": 46.1, "50th": 47.3, "95th": 49.3}, 1: {"5th": 50.5, "50th": 51.8, "95th": 53.8}, 2: {"5th": 53.9, "50th": 55.3, "95th": 57.3}},
-        weight: {0: {"5th": 2.5, "50th": 2.8, "95th": 3.2}, 1: {"5th": 3.4, "50th": 3.7, "95th": 4.3}, 2: {"5th": 4.3, "50th": 4.7, "95th": 5.4}},
-        head:   {0: {"5th": 31.9, "50th": 32.6, "95th": 34.0}, 1: {"5th": 34.7, "50th": 35.4, "95th": 36.7}, 2: {"5th": 36.4, "50th": 37.1, "95th": 38.3}}
-      }
-    };
+    function calculateFertile() {
+      const startDate = document.getElementById("startDate").value;
+      const cycle = parseInt(document.getElementById("cycle").value);
 
-    function classifyPercentile(value, standards) {
-      if (!standards) return '데이터 없음';
-      if (value < standards["5th"]) return '5% 미만 (저위험)';
-      if (value < standards["50th"]) return '5~50%';
-      if (value < standards["95th"]) return '50~95%';
-      return '95% 초과 (고위험)';
-    }
-
-    function calculateGrowth() {
-      const gender = document.getElementById('gender').value;
-      const birthdate = new Date(document.getElementById('birthdate').value);
-      const checkdate = new Date(document.getElementById('checkdate').value);
-      const height = parseFloat(document.getElementById('height').value);
-      const weight = parseFloat(document.getElementById('weight').value);
-      const head = parseFloat(document.getElementById('head').value);
-
-      if (!birthdate || !checkdate || isNaN(height) || isNaN(weight)) {
-        document.getElementById('growthResult').innerText = '모든 필수 항목을 입력하세요.';
+      if (!startDate) {
+        alert("최근 생리 시작일을 입력해주세요.");
         return;
       }
 
-      let ageMonths = (checkdate.getFullYear() - birthdate.getFullYear()) * 12 + (checkdate.getMonth() - birthdate.getMonth());
-      if (checkdate.getDate() < birthdate.getDate()) ageMonths--;
-      const ageYears = ageMonths / 12;
+      const start = new Date(startDate);
+      const ovulationDate = new Date(start);
+      ovulationDate.setDate(ovulationDate.getDate() + cycle - 14); // 배란일은 생리 시작 후 cycle-14일
 
-      const hStd = growthChart[gender].height[ageMonths];
-      const wStd = growthChart[gender].weight[ageMonths];
-      const headStd = growthChart[gender].head[ageMonths];
+      const fertileStart = new Date(ovulationDate);
+      fertileStart.setDate(fertileStart.getDate() - 5);
 
-      let result = `측정 연령: 약 ${ageMonths}개월 (${ageYears.toFixed(1)}세)`;
-      result += `\n키: ${height}cm → 백분위수: ${classifyPercentile(height, hStd)}`;
-      result += `\n몸무게: ${weight}kg → 백분위수: ${classifyPercentile(weight, wStd)}`;
-      if (!isNaN(head)) result += `\n머리둘레: ${head}cm → 백분위수: ${classifyPercentile(head, headStd)}`;
+      const fertileEnd = new Date(ovulationDate);
+      fertileEnd.setDate(fertileEnd.getDate() + 1);
 
-      document.getElementById('growthResult').innerText = result;
+      const formatDate = (d) => `${d.getFullYear()}-${('0'+(d.getMonth()+1)).slice(-2)}-${('0'+d.getDate()).slice(-2)}`;
+
+      document.getElementById("ovulation").textContent = formatDate(ovulationDate);
+      document.getElementById("fertileRange").textContent = `${formatDate(fertileStart)} ~ ${formatDate(fertileEnd)}`;
+      document.getElementById("resultBox").style.display = 'block';
     }
   </script>
 </body>
 </html>
+
